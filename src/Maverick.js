@@ -1,3 +1,5 @@
+//create a element
+// returns type of the the elemets, defined props, children if exists
 function createElement(type, props, ...children) {
   return {
     type,
@@ -12,6 +14,7 @@ function createElement(type, props, ...children) {
   }
 }
 
+// if the element is a text element
 function createTextElement(text) {
   return {
     type: "TEXT_ELEMENT",
@@ -22,6 +25,8 @@ function createTextElement(text) {
   }
 }
 
+//creates a dom elements and updates it to the fiber
+// @ params -> fiber [fiber tree with sibling child and parent]
 function createDom(fiber) {
   const dom =
     fiber.type === "TEXT_ELEMENT"
@@ -39,7 +44,9 @@ const isNew = (prev, next) => (key) =>
   prev[key] !== next[key]
 const isGone = (next) => (key) => !(key in next)
 
+//update to DOM -> @parms[dom->actual dom, previous prop and next property]
 function updateDom(dom, prevProps, nextProps) {
+  //if prop is an event
   Object.keys(prevProps)
     .filter(isEvent)
     .filter(
@@ -56,8 +63,7 @@ function updateDom(dom, prevProps, nextProps) {
         prevProps[name]
       )
     })
-  console.log(prevProps)
-  console.log(nextProps)
+
   // Remove old properties
   Object.keys(prevProps)
     .filter(isProperty)
@@ -200,7 +206,7 @@ function updateFunctionComponent(fiber) {
   hookIndex = 0
   wipFiber.hooks = []
   const children = [fiber.type(fiber.props)]
-  reconcileChildren(fiber, children)
+  diff(fiber, children)
 }
 
 function useState(initial) {
@@ -238,11 +244,11 @@ function updateHostComponent(fiber) {
   if (!fiber.dom) {
     fiber.dom = createDom(fiber)
   }
-  reconcileChildren(fiber, fiber.props.children)
+  diff(fiber, fiber.props.children)
 }
 
-function reconcileChildren(wipFiber, elements) {
-  //react diff
+//react diff
+function diff(wipFiber, elements) {
   let index = 0
   let oldFiber =
     wipFiber.alternate && wipFiber.alternate.child
